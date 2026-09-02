@@ -7,8 +7,10 @@ import { DIMENSIONS } from "@/types/carousel";
  */
 export function extractFontFamilies(html: string): string[] {
   const families = new Set<string>();
-  // Match font-family: "Font Name" or font-family: 'Font Name' or font-family: Font Name
-  const regex = /font-family:\s*['"]?([^;'"}\n]+?)['"]?\s*[;}"]/g;
+  // Match font-family: "Font Name" or font-family: 'Font Name' or font-family: Font Name.
+  // Capture the whole value up to the declaration/attribute terminator — quotes are stripped
+  // below, so excluding them here would drop every quoted stack (font-family:'Inter',sans-serif).
+  const regex = /font-family:\s*([^;}]+?)\s*(?=[;}"]|$)/g;
   let match;
   while ((match = regex.exec(html)) !== null) {
     const raw = match[1].trim();

@@ -11,7 +11,7 @@ import {
 } from './yeedu-chrome.mjs';
 
 const BLOG_URL = 'https://yeedu.com/blog/dumping-observability-data-into-iceberg-lakehouses';
-const OLD_ID = 'db97e281-b4a0-4133-a12a-5ae7b6be831e';
+const OLD_ID = null;   // set to the previous deck's id to replace it
 
 const O = C.orange, OL = C.orangeLight;
 
@@ -210,4 +210,4 @@ const NAME = 'Dumping Observability Data Into Iceberg Lakehouses';
 
 if (OLD_ID) { console.log('Removing superseded deck…'); await deleteCarousel(OLD_ID); }
 const id = await buildCarousel(NAME, slides);
-await exportDeck(id, NAME);
+await exportDeck(id);
