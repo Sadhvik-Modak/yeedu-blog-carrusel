@@ -85,7 +85,7 @@ export async function exportSlide(
   const page = await br.newPage();
 
   try {
-    await page.setViewport({ width, height, deviceScaleFactor: 1 });
+    await page.setViewport({ width, height, deviceScaleFactor: 4 });
     await page.setContent(fullHtml, { waitUntil: "domcontentloaded", timeout: 15000 });
 
     // Wait for fonts to be ready
