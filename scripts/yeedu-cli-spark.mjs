@@ -15,7 +15,7 @@ import {
 } from './yeedu-chrome.mjs';
 
 const BLOG_URL = 'https://yeedu.com/blog/run-spark-job-from-command-line';
-const OLD_ID = '6828580a-0e08-4ddc-9de8-b0a0cdfeb24f';   // set to the previous deck's id to replace it
+const OLD_ID = '6baf632a-ce11-4358-a255-c2d6a91df53f';   // set to the previous deck's id to replace it
 
 const O = C.orange, OL = C.orangeLight;
 
