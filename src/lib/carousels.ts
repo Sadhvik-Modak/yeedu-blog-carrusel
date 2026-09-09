@@ -2,6 +2,7 @@ import { readDataSafe, writeData } from "./data";
 import { generateId, now } from "./utils";
 import type { Carousel, CarouselsData, Slide, AspectRatio, ReferenceImage } from "@/types/carousel";
 import { MAX_SLIDES, MAX_VERSIONS } from "@/types/carousel";
+import { normalizeClip } from "@/types/video";
 
 const FILE = "carousels.json";
 
@@ -120,7 +121,7 @@ export async function addSlide(
 export async function updateSlide(
   carouselId: string,
   slideId: string,
-  updates: Partial<Pick<Slide, "html" | "notes">>
+  updates: Partial<Pick<Slide, "html" | "notes" | "clip">>
 ): Promise<Slide | null> {
   const data = await load();
   const carousel = data.carousels.find((c) => c.id === carouselId);
@@ -136,7 +137,13 @@ export async function updateSlide(
     }
   }
 
-  Object.assign(slide, updates);
+  // Assign field by field. The route hands us a parsed request body, so a
+  // blanket Object.assign would let a caller overwrite id/order/previousVersions —
+  // the Partial<Pick<...>> above is erased at runtime and enforces nothing.
+  if (typeof updates.html === "string") slide.html = updates.html;
+  if (typeof updates.notes === "string") slide.notes = updates.notes;
+  if (updates.clip !== undefined) slide.clip = normalizeClip(updates.clip);
+
   carousel.updatedAt = now();
   await save(data);
   return slide;

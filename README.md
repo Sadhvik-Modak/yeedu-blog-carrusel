@@ -2,7 +2,7 @@
 
 # Open Carrusel
 
-### Chat with Claude. Design Instagram carousels. Export pixel-perfect PNGs.
+### Chat with Claude. Design Instagram carousels. Export pixel-perfect PNGs — or a Reels-ready MP4.
 
 **Local-first. Open source. One command to start.**
 
@@ -115,6 +115,7 @@ You won't get the AI chat without Claude Code installed (the in-app agent shells
 - **Safe-zone overlay** to verify nothing important crops behind Instagram's UI.
 - **Fullscreen preview** for the final review.
 - **One-click export** — Puppeteer screenshots each slide HTML at the exact pixel dimensions Instagram expects, zips them, downloads.
+- **Video export** — give each slide a duration, a transition and optional on-screen text, then hit **Export MP4** for an h264 file you can post as a Reel. Needs `ffmpeg`; if you don't have it, the button greys out and PNG export is unaffected.
 - **Captions + hashtags** generator built into the editor.
 - **All local** — slides, brand, uploads, exports all live in `/data/` and `/public/uploads/`. Nothing is sent to a cloud you don't control. The only network call is when Claude Code talks to Anthropic.
 
@@ -158,6 +159,23 @@ Slides are stored as **body-level HTML** (no `<html>`/`<head>`/`<!DOCTYPE>`). Th
 
 Because the same wrap function feeds both paths, what you see is exactly what you export. No surprises.
 
+### How the slides become an MP4
+
+Open the **Clip Timing** panel under the preview and give the selected slide a duration, an outgoing transition, and optionally a line of on-screen text with its own in/out times. The panel's "total" readout is the exact length of the file you'll get. Then hit **Export MP4**.
+
+Under the hood:
+
+1. The same Puppeteer path renders **one PNG per slide** (at 1×, since video output is natively 1080-wide) plus a **transparent PNG per annotation**.
+2. [`src/lib/video-filtergraph.ts`](./src/lib/video-filtergraph.ts) builds an ffmpeg filter graph. It's pure — no filesystem, no subprocess — so the timing math is testable on its own.
+3. A single `ffmpeg` invocation overlays each annotation onto its clip, then chains the clips with `xfade`.
+
+Two details worth knowing if you touch this code:
+
+- **All timing is integer frames at 30fps**, never float milliseconds. Accumulated float drift in `xfade` offsets shows up as a black tail frame.
+- **Annotation text never reaches ffmpeg.** It's rendered to a PNG by Chromium, so `drawtext` — and its layered `: ' \ %` escaping rules — is deliberately unused. Transition names are checked against an allowlist rather than sanitized.
+
+`ffmpeg` is optional and not bundled. Install it with `brew install ffmpeg` (macOS), `apt install ffmpeg` (Debian/Ubuntu) or `choco install ffmpeg` (Windows), or point `FFMPEG_PATH` at a binary. Without it, MP4 export returns a 503 with an install hint and everything else works normally.
+
 ---
 
 ## 🛠 Slash commands
@@ -195,8 +213,11 @@ flowchart LR
   SLIDES["/api/carousels/.../slides/"]
   DATA[("/data/*.json<br/>async-mutex<br/>atomic writes")]
   EXP["/api/.../export/"]
+  VEXP["/api/.../export-video/"]
   PUP["Puppeteer<br/>(headless Chromium)"]
   ZIP{{"ZIP of PNGs"}}
+  FF["ffmpeg<br/>xfade filter graph"]
+  MP4{{"MP4 (h264)"}}
 
   U --> C & P & F
   C -- "POST chat" --> API
@@ -207,10 +228,15 @@ flowchart LR
   SLIDES <--> DATA
   P <--> SLIDES
   F <--> SLIDES
-  U -- "Export" --> EXP
+  U -- "Export PNG" --> EXP
   EXP --> PUP
   PUP --> ZIP
   ZIP --> U
+  U -- "Export MP4" --> VEXP
+  VEXP -- "slide + annotation PNGs" --> PUP
+  PUP --> FF
+  FF --> MP4
+  MP4 --> U
 ```
 
 **Why these choices:**
@@ -264,7 +290,7 @@ open-carrusel/
 │   ├── components/
 │   │   ├── brand/            ← BrandSetup, ColorPicker, FontSelector, LogoUpload
 │   │   ├── chat/             ← ChatPanel, ChatMessage, ChatInput, ReferenceImages
-│   │   ├── editor/           ← CarouselPreview, SlideFilmstrip, SlideRenderer, ExportButton, ...
+│   │   ├── editor/           ← CarouselPreview, SlideFilmstrip, SlideRenderer, ExportButton, ClipSettingsPanel, ExportVideoButton, ...
 │   │   ├── layout/           ← TopBar
 │   │   ├── templates/        ← TemplateGallery, TemplateCard
 │   │   └── ui/               ← Button, Input, Badge, ConfirmDialog, CreateCarouselDialog
@@ -274,6 +300,10 @@ open-carrusel/
 │   │   ├── carousels.ts             ← carousel + slide CRUD with version history
 │   │   ├── data.ts                  ← JSON storage with async-mutex + atomic writes
 │   │   ├── claude-path.ts           ← portable Claude CLI discovery
+│   │   ├── video-filtergraph.ts     ← pure ffmpeg filter-graph builder (frame math, no I/O)
+│   │   ├── export-video.ts          ← MP4 orchestration: render, encode, temp-dir lifecycle
+│   │   ├── annotation-html.ts       ← the one place annotation text becomes markup (escaped here)
+│   │   ├── ffmpeg-path.ts           ← portable ffmpeg discovery
 │   │   └── ...
 │   └── types/                ← shared TypeScript types
 ├── CLAUDE.md                 ← architecture doc for AI assistants working on this code
@@ -294,7 +324,10 @@ Created automatically by `scripts/setup.mjs` if it can find your Claude CLI. You
 
 ```bash
 CLAUDE_CLI_PATH=/path/to/claude   # set if `which claude` doesn't find it
+FFMPEG_PATH=/path/to/ffmpeg       # optional, only for MP4 export
 ```
+
+`FFMPEG_PATH` is authoritative when set: if it points at nothing, MP4 export reports "not found" naming that path rather than silently falling back to another binary.
 
 On Windows, run `where claude` in PowerShell to find the path (typically `C:\Users\<you>\AppData\Roaming\npm\claude.cmd`), then set `CLAUDE_CLI_PATH` in `.env.local`.
 
@@ -332,6 +365,15 @@ Run `/stop` to kill whatever's there, or run `/start 3001` to use a different po
 **Export fails or hangs.**
 Likely a Puppeteer/Chromium issue. Try `rm -rf node_modules && npm install` to re-trigger the Chromium download. On Linux you may need `apt install` of common Chromium dependencies (libnss3, libatk1.0-0, libxss1, etc.).
 
+**"Export MP4" is greyed out, or MP4 export returns 503.**
+`ffmpeg` isn't on the path. Install it (`brew install ffmpeg` / `apt install ffmpeg` / `choco install ffmpeg`) or set `FFMPEG_PATH` in `.env.local`, then reload. PNG export doesn't need it.
+
+**MP4 export returns "Video is 2.4s — Instagram Reels needs at least 3s."**
+Total length is the sum of clip durations minus the transition overlaps. Raise a duration in the **Clip Timing** panel — the "total" readout there is the exact length you'll get. The ceiling is 90s.
+
+**MP4 export returns 429.**
+Only one video render runs at a time — Chromium at 1080p plus an x264 encode will saturate a laptop, and two concurrent renders tend to time out both. Wait for the first to finish.
+
 **Slides look fine in preview but export looks different.**
 That shouldn't happen — both go through `wrapSlideHtml()`. If it does, file an issue with the slide HTML attached.
 
@@ -347,7 +389,7 @@ Open the brand setup (gear icon) and confirm your colors and style keywords are 
 Open ideas — PRs welcome. Tick what you ship, add your own.
 
 - [ ] **Multi-language slide generation** — Spanish-LATAM voice presets so creators don't fight the AI's English defaults
-- [ ] **Reels storyboard mode** — vertical 9:16 with optional text-on-clip annotations
+- [x] **Reels storyboard mode** — per-slide duration/transition/text-on-clip annotations, exported as a real MP4 (needs `ffmpeg`; PNG export works without it)
 - [ ] **Twitter/X thread export** — same brand voice, different surface
 - [ ] **Notion / Linear export** — push the carousel as a doc with each slide as a section
 - [ ] **Theme presets gallery** — community-curated `style-presets.json` you can one-click apply

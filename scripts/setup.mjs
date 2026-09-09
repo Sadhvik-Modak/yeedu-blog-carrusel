@@ -19,6 +19,25 @@ function runSync(cmd, args, opts = {}) {
   }
 }
 
+function findOnPath(bin) {
+  if (bin === "ffmpeg" && process.env.FFMPEG_PATH) {
+    return fs.existsSync(process.env.FFMPEG_PATH)
+      ? process.env.FFMPEG_PATH
+      : null;
+  }
+  const cmd = process.platform === "win32" ? "where" : "which";
+  try {
+    const r = crossSpawn.sync(cmd, [bin], { encoding: "utf-8", timeout: 2000 });
+    if (r.status === 0 && r.stdout) {
+      const first = r.stdout.split(/\r?\n/).find((l) => l.trim());
+      if (first && fs.existsSync(first.trim())) return first.trim();
+    }
+  } catch {
+    // ignore
+  }
+  return null;
+}
+
 function tryProbeClaude() {
   const isWin = process.platform === "win32";
   const cmd = isWin ? "where" : "which";
@@ -165,6 +184,19 @@ async function main() {
     if (process.platform === "win32") {
       log("  On Windows, run `where claude` to find the path (likely ...\\npm\\claude.cmd).");
     }
+  }
+  log("");
+
+  log("🎬 Checking ffmpeg (optional — MP4 export only)...");
+  const ffmpegFound = findOnPath("ffmpeg");
+  if (ffmpegFound) {
+    log(`  ✅ Found ffmpeg at: ${ffmpegFound}`);
+  } else {
+    log("  ⚠️  ffmpeg not found. PNG export works; MP4 export will be disabled.");
+    log(
+      "  To enable: macOS `brew install ffmpeg`, Debian/Ubuntu `apt install ffmpeg`, Windows `choco install ffmpeg`"
+    );
+    log("  Or set FFMPEG_PATH in .env.local");
   }
   log("");
 

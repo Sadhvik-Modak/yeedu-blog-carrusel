@@ -139,6 +139,31 @@ Each slide is BODY-LEVEL HTML only. No <!DOCTYPE>, <html>, <head>, or <body> tag
 - Visual consistency: same margins, same font sizes across slides
 - Vary backgrounds between slides to maintain visual interest
 
+### Fill density (HARD RULE)
+**No more than 35% of a slide may be blank.** Every slide must fill at least 65% of its ${dimensions.width}x${dimensions.height}px canvas with content. Bare background — however nicely coloured or gradiented — is blank.
+
+Check each slide before you write it:
+- The content must reach top *and* bottom of the safe area, not float in the middle third. If everything sits in one band with empty space above and below, the slide fails.
+- No empty region larger than roughly a quarter of the canvas.
+- A padding band is not content. Neither is a gradient, a texture, nor a panel that holds nothing.
+
+**Fill with a picture, not with prose.** A carousel slide is an infographic; the prose belongs in the LinkedIn/Instagram caption, where the reader is already reading. A slide that fills its 65% with sentences has failed the rule even though it measures full.
+
+When a slide comes out too empty, reach for these in order:
+1. **Draw the idea.** Inline \`<svg>\` works (no \`<script>\` needed) and is the right tool: bar and area charts, dot/lollipop plots, pictogram grids (one square per unit — 29 squares next to 1 reads as "29×" instantly), flow and cycle diagrams with \`<marker>\` arrowheads, timelines, branch graphs, before/after pairs, gauges, page/grid metaphors. Divs work too for simpler bars and matrices.
+2. **Let numbers be the graphic.** One oversized figure with a four-word label beats a sentence stating the same thing.
+3. Structural furniture: a labelled metric strip, a comparison pair, a footer with source / step indicator ("2 of 5") / brand mark.
+
+Only then consider scaling type up. Stretching two words across a whole slide is padding, not density — and never let type grow past the sizes above or breach the safe zone.
+
+Text on a slide earns its place only as a label, an axis, a caption of a few words, or one headline. If a slide has more than roughly 40 words on it, cut prose and draw instead.
+
+**Sizing an inline SVG inside a flex panel:** \`preserveAspectRatio="xMidYMid meet"\` fits to width and centres vertically, so a \`viewBox\` wider than its container leaves dead bands above and below. Choose the viewBox height so \`viewBoxWidth / viewBoxHeight ≈ panelWidth / panelHeight\`, **and** spread the drawing across the whole viewBox — empty margins inside the viewBox produce the same voids.
+
+Hook slides are the usual failure case: an 8-word headline alone will not reach 65%. Pair it with the hero visual, the swipe indicator, and a brand mark — the 8-word cap applies to the headline, not to the slide.
+
+The one exception: a deliberate full-bleed pull-quote or closing CTA may run sparser. Use it at most once per carousel, never on slide 1.
+
 ### Instagram-specific
 - Design for mobile-first (thumb-stop scroll behavior)
 - Grid crop: center of 4:5 slides shows as 1:1 on profile grid

@@ -8,6 +8,7 @@ AI-powered Instagram carousel builder. Next.js 16 + React 19 + TypeScript + Tail
 - **AI Agent**: Claude CLI spawned as subprocess via `/api/chat`, communicates through SSE streaming
 - **Storage**: JSON files in `/data/` with async-mutex locking and atomic writes
 - **Export**: Puppeteer screenshots HTML slides to PNG at exact Instagram dimensions
+- **Video export**: The same Puppeteer path renders one PNG per slide (at 1x) plus a transparent PNG per text annotation, then a single ffmpeg invocation chains them with `xfade`. All timing is integer frames at 30fps (`src/types/video.ts`); the filter graph is built by the pure, I/O-free `src/lib/video-filtergraph.ts` and passed via `-filter_complex_script`. Annotation text is rendered to a PNG by Puppeteer and **never reaches ffmpeg** — `drawtext` is deliberately unused. Transition names are allowlisted, not sanitized. ffmpeg is optional: without it MP4 export returns 503 and PNG export is unaffected.
 - **Slides**: Full HTML documents rendered in sandboxed iframes. `wrapSlideHtml()` in `src/lib/slide-html.ts` is the shared rendering contract between preview and export.
 
 ## Key Files
@@ -17,6 +18,12 @@ AI-powered Instagram carousel builder. Next.js 16 + React 19 + TypeScript + Tail
 - `src/lib/data.ts` — JSON storage with proper async-mutex and atomic writes
 - `src/lib/carousels.ts` — Carousel and slide CRUD with version history
 - `src/lib/claude-path.ts` — Portable Claude CLI discovery
+- `src/lib/export-slides.ts` — `renderHtmlToPng()` is the shared Puppeteer entry point for both PNG and video export
+- `src/lib/video-filtergraph.ts` — Pure filter-graph builder: `planTimeline()` + `buildVideoArgs()`, all frame math, no I/O
+- `src/lib/export-video.ts` — MP4 orchestration (temp job dir, ffmpeg spawn, progress registry, single-render semaphore)
+- `src/lib/annotation-html.ts` — The one place annotation text becomes markup; escape here or nowhere
+- `src/lib/ffmpeg-path.ts` — Portable ffmpeg discovery (`FFMPEG_PATH` is authoritative when set)
+- `src/types/video.ts` — Clip settings, transition allowlist, clamps, and `normalizeClip()`
 
 ## API Routes
 
@@ -30,6 +37,8 @@ All at localhost:3000:
 - `PUT /api/carousels/[id]/slides` — Reorder slides (body: { slideIds: [...] })
 - `POST /api/carousels/[id]/slides/[slideId]/undo` — Undo slide change
 - `POST /api/carousels/[id]/export` — Export all slides to PNG ZIP
+- `POST /api/carousels/[id]/export-video` — Render slides to an MP4 (requires ffmpeg)
+- `GET /api/carousels/[id]/export-video/progress` — Poll render/encode progress + ffmpeg availability
 - `GET/PUT /api/brand` — Brand configuration
 - `GET/POST /api/templates` — Templates
 - `POST /api/upload` — Image upload (PNG/JPG/WebP only, max 10MB)
@@ -43,13 +52,15 @@ All at localhost:3000:
 - All data mutations go through `src/lib/data.ts` (never direct fs writes for JSON)
 - iframe slides always use `sandbox=""` attribute (no JavaScript execution)
 - The Claude subprocess gets `--allowedTools Bash WebFetch` and uses curl to call local API routes
+- Video timing is always integer frames at `FPS` (`src/types/video.ts`) — never float milliseconds, which drifts in `xfade` offsets and leaves a black tail frame
+- Any `clip` arriving from a request goes through `normalizeClip()` before it is stored or rendered; `updateSlide()` assigns whitelisted fields one by one, so never reintroduce a blanket `Object.assign` there
 
 ## Instagram Dimensions
 
 - 1:1 = 1080x1080 (square)
 - 4:5 = 1080x1350 (portrait, recommended)
 - 9:16 = 1080x1920 (story)
-- Max 10 slides per carousel
+- Max 20 slides per carousel (`MAX_SLIDES` in `src/types/carousel.ts`)
 
 ## Slide HTML Rules
 

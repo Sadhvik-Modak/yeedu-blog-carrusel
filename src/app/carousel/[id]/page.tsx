@@ -12,6 +12,8 @@ import { CarouselPreview } from "@/components/editor/CarouselPreview";
 import { SlideFilmstrip } from "@/components/editor/SlideFilmstrip";
 import { AspectRatioSelector } from "@/components/editor/AspectRatioSelector";
 import { ExportButton } from "@/components/editor/ExportButton";
+import { ExportVideoButton } from "@/components/editor/ExportVideoButton";
+import { ClipSettingsPanel } from "@/components/editor/ClipSettingsPanel";
 import { CaptionPanel } from "@/components/editor/CaptionPanel";
 import { SafeZoneOverlay } from "@/components/editor/SafeZoneOverlay";
 import { FullscreenPreview } from "@/components/editor/FullscreenPreview";
@@ -314,6 +316,10 @@ export default function CarouselEditorPage({ params }: PageProps) {
               carouselId={carousel.id}
               slideCount={carousel.slides.length}
             />
+            <ExportVideoButton
+              carouselId={carousel.id}
+              slideCount={carousel.slides.length}
+            />
           </div>
 
           {/* Carousel preview */}
@@ -323,6 +329,14 @@ export default function CarouselEditorPage({ params }: PageProps) {
             activeIndex={activeSlide}
             onActiveChange={setActiveSlide}
             showSafeZones={showSafeZones}
+          />
+
+          {/* Clip timing (MP4 export) */}
+          <ClipSettingsPanel
+            carouselId={carousel.id}
+            slides={carousel.slides}
+            activeIndex={activeSlide}
+            onUpdated={fetchCarousel}
           />
 
           {/* Caption panel */}

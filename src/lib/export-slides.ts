@@ -60,21 +60,34 @@ async function inlineImages(html: string): Promise<string> {
   return result;
 }
 
+export interface RenderOptions {
+  /** Device scale factor. 4 for print-quality PNG export, 1 for video frames. */
+  scale?: number;
+  /** Render with a transparent background (annotation overlays). */
+  omitBackground?: boolean;
+  /** Run the Sharp sRGB pass. Skip it for alpha overlays so nothing flattens transparency. */
+  postProcess?: boolean;
+}
+
 /**
- * Export a single slide to PNG buffer.
+ * Render body-level HTML to a PNG buffer through the shared slide contract.
+ * Both slide export and annotation overlays go through here so typography and
+ * image inlining behave identically.
  */
-export async function exportSlide(
-  slide: Slide,
-  aspectRatio: AspectRatio
+export async function renderHtmlToPng(
+  bodyHtml: string,
+  aspectRatio: AspectRatio,
+  options: RenderOptions = {}
 ): Promise<Buffer> {
+  const { scale = 4, omitBackground = false, postProcess = true } = options;
   const { width, height } = DIMENSIONS[aspectRatio];
 
   // Get inlined font CSS
-  const fontFamilies = extractFontFamilies(slide.html);
+  const fontFamilies = extractFontFamilies(bodyHtml);
   const inlinedFontCss = await getInlinedFontCSS(fontFamilies);
 
   // Inline images
-  const inlinedHtml = await inlineImages(slide.html);
+  const inlinedHtml = await inlineImages(bodyHtml);
 
   // Build self-contained HTML
   const fullHtml = wrapSlideHtml(inlinedHtml, aspectRatio, {
@@ -85,7 +98,7 @@ export async function exportSlide(
   const page = await br.newPage();
 
   try {
-    await page.setViewport({ width, height, deviceScaleFactor: 4 });
+    await page.setViewport({ width, height, deviceScaleFactor: scale });
     await page.setContent(fullHtml, { waitUntil: "domcontentloaded", timeout: 15000 });
 
     // Wait for fonts to be ready
@@ -103,10 +116,13 @@ export async function exportSlide(
 
     const screenshotBuffer = await page.screenshot({
       type: "png",
+      omitBackground,
       clip: { x: 0, y: 0, width, height },
     });
 
     exportCount++;
+
+    if (!postProcess) return Buffer.from(screenshotBuffer);
 
     // Post-process with Sharp: enforce sRGB
     const processed = await sharp(screenshotBuffer)
@@ -121,13 +137,25 @@ export async function exportSlide(
 }
 
 /**
+ * Export a single slide to PNG buffer.
+ */
+export async function exportSlide(
+  slide: Slide,
+  aspectRatio: AspectRatio,
+  options?: RenderOptions
+): Promise<Buffer> {
+  return renderHtmlToPng(slide.html, aspectRatio, options);
+}
+
+/**
  * Export all slides of a carousel to PNG buffers.
  * Processes up to 3 slides concurrently.
  */
 export async function exportAllSlides(
   slides: Slide[],
   aspectRatio: AspectRatio,
-  onProgress?: (current: number, total: number) => void
+  onProgress?: (current: number, total: number) => void,
+  options?: RenderOptions
 ): Promise<{ name: string; buffer: Buffer }[]> {
   const results: { name: string; buffer: Buffer }[] = [];
   const CONCURRENCY = 3;
@@ -137,7 +165,7 @@ export async function exportAllSlides(
     const batchResults = await Promise.all(
       batch.map(async (slide, batchIdx) => {
         const idx = i + batchIdx;
-        const buffer = await exportSlide(slide, aspectRatio);
+        const buffer = await exportSlide(slide, aspectRatio, options);
         onProgress?.(idx + 1, slides.length);
         return { name: `slide-${idx + 1}.png`, buffer };
       })

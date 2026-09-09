@@ -1,3 +1,5 @@
+import type { ClipSettings } from "./video";
+
 export type AspectRatio = "1:1" | "4:5" | "9:16";
 
 export interface Slide {
@@ -6,6 +8,8 @@ export interface Slide {
   previousVersions: string[];
   order: number;
   notes: string;
+  /** Timing/transition/annotation for MP4 export. Absent on slides created before video export. */
+  clip?: ClipSettings;
 }
 
 export interface ReferenceImage {

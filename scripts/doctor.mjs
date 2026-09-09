@@ -82,7 +82,40 @@ if (missingData.length === 0) {
   add(WARN, "Data files", `${missingData.length} missing: ${missingData.join(", ")} — run /start`);
 }
 
-// 5. Port 3000
+// 5. ffmpeg (MP4 export only — PNG export works without it, so never fatal)
+const ffmpegEnv = process.env.FFMPEG_PATH;
+const ffmpegCandidates = [
+  ffmpegEnv,
+  "/usr/bin/ffmpeg",
+  "/usr/local/bin/ffmpeg",
+  "/opt/homebrew/bin/ffmpeg",
+  join(homedir(), ".local/bin/ffmpeg"),
+].filter(Boolean);
+
+let ffmpegPath = null;
+const whichFfmpeg = tryExec(
+  platform() === "win32" ? "where ffmpeg" : "command -v ffmpeg"
+);
+if (whichFfmpeg) ffmpegPath = whichFfmpeg.split("\n")[0];
+if (!ffmpegPath) {
+  for (const c of ffmpegCandidates) {
+    if (existsSync(c)) {
+      ffmpegPath = c;
+      break;
+    }
+  }
+}
+if (ffmpegPath) {
+  add(CHECK, "ffmpeg", ffmpegPath);
+} else {
+  add(
+    WARN,
+    "ffmpeg",
+    "not found — MP4 export disabled (brew/apt/choco install ffmpeg, or set FFMPEG_PATH). PNG export unaffected."
+  );
+}
+
+// 6. Port 3000
 let portStatus = "free";
 let portFree = true;
 if (platform() !== "win32") {
