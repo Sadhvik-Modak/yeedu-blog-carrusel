@@ -103,7 +103,7 @@ export function headline(text, size = 54) {
 
 /** Optional italic gradient fragment, for use inside headline(). */
 export function em(text) {
-  return `<span style="font-weight:300;font-style:italic;background:linear-gradient(180deg,#fff,${C.orangeLight});-webkit-background-clip:text;background-clip:text;color:transparent;">${text}</span>`;
+  return `<span style="font-weight:300;font-style:italic;background:linear-gradient(180deg,#fff,${C.orangeLight});-webkit-background-clip:text;background-clip:text;color:transparent;padding-right:0.12em;">${text}</span>`;
 }
 
 export function caption(text) {

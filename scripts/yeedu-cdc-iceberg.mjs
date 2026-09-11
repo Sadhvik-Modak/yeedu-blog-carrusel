@@ -11,7 +11,7 @@ import {
 } from './yeedu-chrome.mjs';
 
 const BLOG_URL = 'https://yeedu.com/blog/cdc-to-iceberg-pipelines-postgres-mysql-logical-replication';
-const OLD_ID = 'ed880550-f6b7-4b33-ba6e-279c8898317c';
+const OLD_ID = '09090973-56ca-40c9-a027-843fef524b78';
 
 const O = C.orange, OL = C.orangeLight;
 
@@ -71,7 +71,7 @@ function drawDeleteAmplification() {
   b += `<g fill="none" stroke="#fff" stroke-opacity="0.3" stroke-width="1.4">`;
   for (let i = 0; i < 9; i++) b += `<rect x="16" y="${110 - i * 8.5}" width="78" height="6" rx="1.5"/>`;
   b += `</g>`;
-  b += `<text x="55" y="30" text-anchor="middle" font-family="Inter" font-size="6.2" font-weight="600" letter-spacing="0.8" fill="#fff" opacity="0.42">DELETE FILES — ONE PER COMMIT</text>`;
+  b += `<text x="55" y="30" text-anchor="middle" font-family="Inter" font-size="6.2" font-weight="600" letter-spacing="0.8" fill="#fff" opacity="0.42">DELETE FILES · ONE PER COMMIT</text>`;
   b += `<path d="M55,34 L55,40" stroke="#fff" stroke-opacity="0.25" stroke-width="1.5"/>`;
 
   // "causes" — dashed connector + drawn chevron
@@ -188,7 +188,7 @@ const slides = [
     html: stage(`
       ${logoMark(32)}
       ${eyebrow('CDC · Postgres & MySQL')}
-      ${headline(`Five hops. ${em('Five ways to lose a row.')}`, 52)}
+      ${headline(`Five hops. ${em('Five ways to lose a row')}`, 52)}
       ${well(drawHopChain(), { card: false })}
       <p style="margin:14px 0 0;font-size:22px;line-height:1.5;color:${C.text2};max-width:880px;">
         One team's partitioned publication silently dropped rows for <strong style="color:${C.orangeLight};font-weight:600;">three weeks</strong> before anyone noticed.
@@ -199,27 +199,27 @@ const slides = [
     notes: 'Equality deletes — accumulating delete-file stack "causes" a bending read-cost curve (proportional stack + annotation)',
     html: stage(`
       ${eyebrow('Read amplification')}
-      ${headline('Every delete file is a tax on every read.', 50)}
+      ${headline('Every delete file taxes every read', 48)}
       ${well(drawDeleteAmplification())}
-      ${caption(`Equality deletes let Flink write without reading first — the cost moves to query time. Each commit adds a delete file the reader must merge.`)}
+      ${caption(`Equality deletes let Flink write without reading first, so the cost moves to query time. Each commit adds a delete file the reader has to merge.`)}
     `, 'B'),
   },
   {
     notes: 'Small files — ragged comb → funnel → three thick bars, plus query-time bars drawn to 99s/59s scale (AWS EMR numbers)',
     html: stage(`
       ${eyebrow('The small-file explosion')}
-      ${headline('58,176 objects. One table.', 50)}
+      ${headline('58,176 objects. One table', 50)}
       ${well(drawCompaction())}
-      ${caption(`AWS consolidated 2 GB of tiny Parquet objects into ~437 MB. Same data, same query — 40% less time.`)}
+      ${caption(`AWS consolidated 2 GB of tiny Parquet objects into ~437 MB. Same data, same query, 40% less time.`)}
     `, 'C'),
   },
   {
     notes: 'Replication slot bloat — three WAL growth rays crossing a solid disk-ceiling rule; crossing time is the data',
     html: stage(`
       ${eyebrow('Replication slot bloat')}
-      ${headline('A dead connector is a clock on your primary.', 48)}
+      ${headline('A dead connector is a clock', 52)}
       ${well(drawWalCeiling())}
-      ${caption(`Postgres holds WAL until the slot advances. At 20–50 GB/hr, a stopped Debezium connector is a disk-full incident on the production database.`)}
+      ${caption(`Postgres holds WAL until the slot advances. At 20–50 GB/hr, a stopped Debezium connector doesn't page you first. It fills the production disk.`)}
     `, 'B'),
   },
   {
@@ -227,7 +227,7 @@ const slides = [
     html: stage(`
       ${logoMark(32)}
       ${eyebrow('Build it boring')}
-      ${headline(`Fewer moving parts. ${em('Fresh enough.')}`, 50)}
+      ${headline(`Fewer moving parts. ${em('Fresh enough')}`, 50)}
       ${well(drawConvergence(), { card: false })}
       <div style="display:flex;align-items:center;justify-content:space-between;gap:32px;margin-top:16px;">
         <div>

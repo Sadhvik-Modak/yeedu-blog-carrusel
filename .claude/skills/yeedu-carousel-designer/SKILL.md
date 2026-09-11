@@ -112,8 +112,12 @@ Kubernetes, on-prem · catalogs: Hive Metastore, Unity Catalog, Iceberg, Delta L
 languages: PySpark, Scala, Java, Python 3+.
 
 **Voice**: senior B2B marketer. Technical credibility married to business framing. Declarative,
-restrained, contrast-driven — the sentence structure is usually *"the thing you accept" → "what
-it actually costs."* Hard numbers over adjectives. Italics for the one emotional beat per deck.
+restrained. Hard numbers over adjectives. Italics for the one emotional beat per deck.
+
+There is deliberately **no sentence formula here**. The previous version of this line prescribed
+one ("the thing you accept" → "what it actually costs"), and the first six decks all followed it,
+which is exactly why they read as machine-written. Say the thing once, in sentence case, with the
+number in it. The shapes to avoid are vetoes, listed in Part 4, and the gate enforces them.
 
 **Audience**: data engineers, data architects, CTOs, CFOs at mid-to-large enterprises already
 running Spark at cost.
@@ -247,6 +251,44 @@ asks for all three — a single 4:5 deck is the common request.
 8. **For print banners**, confirm the export ran at `deviceScaleFactor: 4`.
 9. **Never hand back a deck you have not looked at.** Every run ends in
    `output/<carousel-name>/1.jpg …` and every one of those files gets opened.
+10. **Never hand back a deck the copy gate fails.** See below.
+
+### Copy vetoes
+
+A slide carrying any of these is wrong however good it looks. They are measured, not folklore —
+the classic "AI words" (hedging, *moreover*, *robust*, *seamless*) separate at chance and are
+deliberately **not** banned. Do not add a banned-word list.
+
+| Veto | Do not write | Write instead |
+|---|---|---|
+| `parallelism` | "not X, but Y" · "it isn't A, it's B" | one claim |
+| `antithesis_beat` | "Storage is cheap. Compaction is not." | "Compaction is where the savings go" |
+| `negation_reframe` | "The question is no longer A. It is B." | ask B directly |
+| `discourse_markers` | "the real problem is" · "the catch is" · "the point is" | state it |
+| `is_that_filler` | "The problem is that X" | X |
+| `emdash` | "afterwards — and managed compaction" | comma, colon, or full stop |
+| `title_case_headline` | "EMR's Real Cost Is Operational." | "EMR's real cost is operational" |
+| `headline_terminal_period` | any headline ending in `.` | drop the full stop |
+| `cta_boilerplate` | "Follow for more" · "Save this" | a specific next action |
+
+The em-dash veto exempts the faint `—` used for an empty cell in a comparison matrix
+(`references/infographics.md`) — that is a glyph, not punctuation.
+
+Positive rules: contractions are normal, first person where it is true, name the actual number
+and product, state facts flatly, and vary the grammar across the deck so eight headlines do not
+share one shape. Full rationale and the corpus numbers in
+`.claude/skills/measured-humanizer/SKILL.md`.
+
+### Anti-default design
+
+Part 1 already forbids template flow. These are the deck-level habits that still slip through:
+
+- **No two slides share a composition.** Change where the weight sits, not just the drawing.
+- **Asymmetry by default.** Centred stacks are the generated look.
+- **No gradient headline text** except the one `em()` accent fragment per deck.
+- **No glow or decorative drop shadow** beyond the stage's own background wash.
+- **No evenly spaced 3-up card grid, no pill row, no icon-in-a-circle row.**
+- **Break the grid once per deck** — one element overlapping its container.
 
 ---
 
@@ -380,6 +422,18 @@ A script that runs clean can still produce an unreadable slide. Always:
      letter-spacing runs ≈4.6 units per character — estimate the width before trusting an `x`,
      and remember a sloping data line will cut through a label placed too close to it.
 
+4. **Run the copy gate and clear it.**
+
+   ```bash
+   node .claude/skills/measured-humanizer/gate/carousel_gate.mjs --carousel <id> --brief
+   ```
+
+   Fix the single rule it reports as `worst`, in the deck script rather than in
+   `data/carousels.json`, re-run the script, re-run the gate. Stop at `pass=true` or after four
+   passes. Exit code is always 0, so read `pass` from the output. `--all` prints the house
+   fingerprint across every deck: if a new deck's headline shapes match the rest of the house, it
+   is templated even when no single line trips a rule.
+
 The blank-QR bug, a full-frame-stretched logo, and a whole app's worth of missing fonts each
 shipped precisely because nobody opened the images.
 
@@ -387,6 +441,8 @@ shipped precisely because nobody opened the images.
 
 ## Companion skills
 
+- **`measured-humanizer`** (`.claude/skills/measured-humanizer/`) — the copy vetoes above, the
+  corpus numbers behind them, and `gate/carousel_gate.mjs`. Read it before writing headlines.
 - **`iconsax-library`** — icons for genuinely iconic uses (a logo mark, a platform badge). One
   style per deck. Never as a substitute for a diagram.
 - **`claude-d3js-skill`** — when a chart needs real axes and scales.

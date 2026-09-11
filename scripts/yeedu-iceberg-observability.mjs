@@ -11,7 +11,7 @@ import {
 } from './yeedu-chrome.mjs';
 
 const BLOG_URL = 'https://yeedu.com/blog/dumping-observability-data-into-iceberg-lakehouses';
-const OLD_ID = 'db97e281-b4a0-4133-a12a-5ae7b6be831e';
+const OLD_ID = '567ae003-8731-423b-bc3d-eb2971611688';
 
 const O = C.orange, OL = C.orangeLight;
 
@@ -60,9 +60,9 @@ function drawCompactionGap() {
   b += `<text x="34" y="${(sm0 + 2).toFixed(1)}" text-anchor="end" font-family="Montserrat" font-size="8.5" font-weight="700" fill="#fff">$0.17</text>`;
   b += `<text x="${x1}" y="${(mg1 - 7).toFixed(1)}" text-anchor="end" font-family="Montserrat" font-size="10" font-weight="800" fill="#fff">$47.69</text>`;
   b += `<text x="${x1}" y="${(sm1 + 12).toFixed(1)}" text-anchor="end" font-family="Montserrat" font-size="10" font-weight="800" fill="#fff">$2.29</text>`;
-  b += `<text x="${x1}" y="${(mg1 - 15).toFixed(1)}" text-anchor="end" font-family="Inter" font-size="6" font-weight="600" letter-spacing="0.7" fill="#fff" opacity="0.5">S3 TABLES — MANAGED</text>`;
+  b += `<text x="${x1}" y="${(mg1 - 15).toFixed(1)}" text-anchor="end" font-family="Inter" font-size="6" font-weight="600" letter-spacing="0.7" fill="#fff" opacity="0.5">S3 TABLES · MANAGED</text>`;
   // +28, not +20 — the label is wide enough that the rising line clipped its left end
-  b += `<text x="${x1}" y="${(sm1 + 28).toFixed(1)}" text-anchor="end" font-family="Inter" font-size="6" font-weight="600" letter-spacing="0.7" fill="#fff" opacity="0.5">EMR — SELF-MANAGED</text>`;
+  b += `<text x="${x1}" y="${(sm1 + 28).toFixed(1)}" text-anchor="end" font-family="Inter" font-size="6" font-weight="600" letter-spacing="0.7" fill="#fff" opacity="0.5">EMR · SELF-MANAGED</text>`;
   // the multiple, annotated at both ends of the gap
   b += `<text x="${x0 + 6}" y="${((mg0 + sm0) / 2 + 3).toFixed(1)}" font-family="Montserrat" font-size="12" font-weight="800" fill="${OL}">29×</text>`;
   b += `<text x="${x1 - 6}" y="${((mg1 + sm1) / 2 + 3).toFixed(1)}" text-anchor="end" font-family="Montserrat" font-size="12" font-weight="800" fill="${OL}">20.8×</text>`;
@@ -70,7 +70,7 @@ function drawCompactionGap() {
     b += `<line x1="${px}" y1="128" x2="${px}" y2="132" stroke="#fff" stroke-opacity="0.25" stroke-width="1.5"/>`;
     b += `<text x="${px}" y="141" text-anchor="middle" font-family="Inter" font-size="6.4" font-weight="600" fill="#fff" opacity="0.5">${t}</text>`;
   });
-  // two short lines — one long line ran under the "S3 TABLES — MANAGED" label
+  // two short lines — one long line ran under the "S3 TABLES · MANAGED" label
   b += `<text x="26" y="14" font-family="Inter" font-size="6" font-weight="600" letter-spacing="0.9" fill="#fff" opacity="0.4">COST TO COMPACT</text>`;
   b += `<text x="26" y="22" font-family="Inter" font-size="6" font-weight="600" letter-spacing="0.9" fill="#fff" opacity="0.28">LOG SCALE</text>`;
   b += annot(14, 152, { label: 'THE BILL ICEBERG STORAGE PRICING HIDES', value: '20–29×', note: 'managed compaction vs self-managed, identical workload' });
@@ -95,7 +95,7 @@ function drawLatencyBands() {
   b += `<rect x="${i0.toFixed(1)}" y="72" width="${(i1 - i0).toFixed(1)}" height="19" rx="9.5" fill="${O}"/>`;
   b += `<text x="${i0.toFixed(1)}" y="67" font-family="Inter" font-size="6.4" font-weight="600" letter-spacing="0.8" fill="${OL}">ICEBERG DIRECT</text>`;
   b += `<text x="${((i0 + i1) / 2).toFixed(1)}" y="85.5" text-anchor="middle" font-family="Montserrat" font-size="9" font-weight="700" fill="#fff">2 – 40 s</text>`;
-  b += annot(26, 132, { label: 'WHAT THE ON-CALL ENGINEER FEELS AT 3 AM', value: 'seconds', note: 'to tens of seconds — against sub-second on SaaS' });
+  b += annot(26, 132, { label: 'WHAT THE ON-CALL ENGINEER FEELS AT 3 AM', value: 'seconds', note: 'tens of seconds, against sub-second on SaaS' });
   return svg(200, 172, b);
 }
 
@@ -138,7 +138,7 @@ function drawCompressionBookend() {
   b += `<text x="144" y="41" font-family="Inter" font-size="6.4" font-weight="600" fill="#fff" opacity="0.55">3 days</text>`;
   b += `<rect x="132" y="54" width="60" height="9" rx="2" fill="${O}"/>`;
   b += `<text x="132" y="76" font-family="Montserrat" font-size="9" font-weight="700" fill="${OL}">30 days</text>`;
-  b += annot(14, 106, { label: 'UBER CLP ON SPARK LOGS', value: '169×', note: 'purpose-built compression — a general format cannot' });
+  b += annot(14, 106, { label: 'UBER CLP ON SPARK LOGS', value: '169×', note: 'purpose-built compression, which a general format cannot do' });
   return svg(200, 150, b, 780);
 }
 
@@ -151,7 +151,7 @@ const slides = [
     html: stage(`
       ${logoMark(32)}
       ${eyebrow('Observability on Iceberg')}
-      ${headline(`The storage math is ${em('obvious.')}`, 52)}
+      ${headline(`The storage math is ${em('obvious')}`, 52)}
       ${well(drawCostRatio(), { card: false })}
       <p style="margin:14px 0 0;font-size:22px;line-height:1.5;color:${C.text2};max-width:880px;">
         700 GB of logs a day on Datadog is half a million dollars a year. The same 250 TB on S3 is seventy thousand. Then you read the rest of the bill.
@@ -162,25 +162,25 @@ const slides = [
     notes: 'Compaction gap — two cost lines on a log axis with the widening gap shaded orange; 29× at 100GB, 20.8× at 953.7GB',
     html: stage(`
       ${eyebrow('The bill under the bill')}
-      ${headline('Storage is cheap. Compaction is not.', 50)}
+      ${headline('Save on storage, pay 29× to compact', 44)}
       ${well(drawCompactionGap())}
-      ${caption(`Iceberg is batch-shaped and observability is a continuous write. Somebody has to pay to tidy up afterwards — and managed compaction charges like it.`)}
+      ${caption(`Iceberg is batch-shaped and observability is a continuous write. Somebody's paying to tidy up afterwards, and managed compaction charges like it.`)}
     `, 'C'),
   },
   {
     notes: 'Latency trade-off — SaaS and Iceberg bands positioned on one shared log time axis',
     html: stage(`
       ${eyebrow('What 85% actually costs')}
-      ${headline('You are trading dollars for seconds.', 48)}
+      ${headline("You're trading dollars for seconds", 48)}
       ${well(drawLatencyBands())}
-      ${caption(`Parquet row groups decompress whole pages to return one record — the opposite of what incident debugging asks for. Tuning metadata took one team from tens of seconds to ~1 second. It never got to sub-second.`)}
+      ${caption(`Parquet row groups decompress whole pages to return one record, which is the opposite of what incident debugging asks for. Tuning metadata took one team from tens of seconds to ~1 second. They didn't get to sub-second.`)}
     `, 'B'),
   },
   {
     notes: 'Small-file arrival — a literal 10×10 grid (100 files/minute) causing a 100K+ outcome token',
     html: stage(`
       ${eyebrow('The small-files death spiral')}
-      ${headline('A hundred files. Every minute.', 50)}
+      ${headline('A hundred files. Every minute', 50)}
       ${well(drawFileArrival())}
       ${caption(`Millions of tiny writers, one commit per partition. Metadata grows to millions of entries and query planning slows down before the scan even starts.`)}
     `, 'B'),
@@ -190,7 +190,7 @@ const slides = [
     html: stage(`
       ${logoMark(32)}
       ${eyebrow('Do it deliberately')}
-      ${headline(`Purpose-built beats ${em('general-purpose.')}`, 48)}
+      ${headline(`Purpose-built beats ${em('general-purpose')}`, 48)}
       ${well(drawCompressionBookend(), { card: false })}
       <div style="display:flex;align-items:center;justify-content:space-between;gap:32px;margin-top:12px;">
         <div>

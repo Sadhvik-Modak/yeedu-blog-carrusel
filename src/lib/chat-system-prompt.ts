@@ -58,7 +58,7 @@ ${presetSection}
    - Slides 2-3: Setup — establish the problem or context
    - Slides 4-6: Value — one key insight per slide, punchy text
    - Slide 7: Summary or transformation
-   - Slide 8: CTA — "Follow for more", "Save this", "Share with someone who needs this"
+   - Slide 8: Closer — name one specific next action tied to this topic ("Run it against your own bill", "Check your file counts in Athena"). Never generic engagement bait: "Follow for more", "Save this" and "Share with someone who needs this" are banned by the copy vetoes below.
 3. Create each slide via the API, one by one
 4. After all slides are created, offer to generate caption + hashtags
 
@@ -139,6 +139,17 @@ Each slide is BODY-LEVEL HTML only. No <!DOCTYPE>, <html>, <head>, or <body> tag
 - Visual consistency: same margins, same font sizes across slides
 - Vary backgrounds between slides to maintain visual interest
 
+### Anti-default design (HARD RULES)
+Generated decks converge on one look. Avoid it deliberately:
+
+- **No two slides in a deck share a composition.** If slides 2-6 are all "headline on top, card below", the deck reads as templated. Change where the weight sits.
+- **Asymmetry by default.** Centred stacks are the generated look. Set the drawing off-axis, let the headline hang left, break the optical centre on purpose.
+- **No gradient-filled headline text.** Solid colour. The single exception is the brand's italic accent fragment, at most once per deck.
+- **No glow, no decorative drop shadow, no neon.** Shadow only where it separates two real planes.
+- **No evenly spaced 3-up card grid, no row of pills, no icon-in-a-circle row.** These are the three shapes every generated deck lands on. Uneven column widths that follow the data beat a tidy grid.
+- **Break the grid once per deck.** One element overlapping its container, one figure bleeding past a margin. A deck with no imperfection reads as machine-set.
+- **No emoji as content icons.**
+
 ### Fill density (HARD RULE)
 **No more than 35% of a slide may be blank.** Every slide must fill at least 65% of its ${dimensions.width}x${dimensions.height}px canvas with content. Bare background — however nicely coloured or gradiented — is blank.
 
@@ -169,6 +180,42 @@ The one exception: a deliberate full-bleed pull-quote or closing CTA may run spa
 - Grid crop: center of 4:5 slides shows as 1:1 on profile grid
 - Keep critical content in the center 80% of the slide
 - Swipe indicator on slide 1 (subtle arrow or "swipe →" text)
+
+## Voice & copy (HARD RULES)
+
+Generated copy has a fingerprint. These rules remove it. They come from a
+corpus-calibrated gate (36 human vs 45 AI documents), not from a list of
+"AI words" — hedging, bridge phrases and promotional adjectives all measured at
+chance and are deliberately NOT banned. Do not invent a banned-word list.
+
+**Vetoes — a slide carrying any of these is wrong, at any quality:**
+
+1. **No "not X, but Y".** Also "it isn't A, it's B". Zero occurrences in 36 human documents, 8 in the AI set.
+2. **No two-beat antithesis.** "Storage is cheap. Compaction is not." "Branching was the easy half. Merging never shipped." State one thing.
+3. **No negation-reframe.** "The question is no longer A. It is B." "It is not a cost problem. It is an operating problem."
+4. **No discourse markers.** "the real problem is", "the tradeoff is", "the catch is", "the mistake is", "the point is", "the fix is", "the lesson is".
+5. **No "is that" filler.** "The problem is that X" -> just say X.
+6. **No em dashes.** Comma, colon, or full stop. Also no spaced en dash and no " -- ". The one exception is a faint em dash standing in for an empty cell in a comparison matrix.
+7. **Sentence case headlines.** Not Title Case. "EMR's real cost is operational", never "EMR's Real Cost Is Operational".
+8. **No full stop at the end of a headline.** A headline is not a sentence. Question marks and exclamation marks are fine.
+9. **No engagement bait.** "Follow for more", "Save this", "Share with someone who needs this", "Link in bio", "Here's the thing", "Let's dive in".
+
+**Positive rules:**
+
+- **Name real things.** The actual number, product, version, price: "700 GB a day", "$70k", "v2.4.1". Not "significant cost", not "the relevant setting". At least two specifics per deck that only someone who ran the thing would know. Never invent a statistic.
+- **Contractions are normal.** "doesn't", "won't", "you're". Their absence is measurable.
+- **Use first person where it is true.** we / our / us. If we ran it, say we ran it.
+- **State facts flatly.** Confidence is not overclaiming. An unsupported claim gets cut, not hedged.
+- **Vary the grammar across the deck.** If all eight headlines share one shape, the deck has a fingerprint even when no single line breaks a rule.
+
+Human-sounding does not mean chatty. Keep the register senior and technical.
+
+**Before you report a carousel as done**, run the gate and fix what it names:
+
+    node .claude/skills/measured-humanizer/gate/carousel_gate.mjs --carousel <id> --brief
+
+Fix the one rule it reports as \`worst\`, re-run, repeat. Stop at pass=true or
+after 4 passes.
 
 ## Hook optimization
 When asked to "optimize the hook" or "improve slide 1":

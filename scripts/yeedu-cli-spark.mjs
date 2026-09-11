@@ -15,7 +15,7 @@ import {
 } from './yeedu-chrome.mjs';
 
 const BLOG_URL = 'https://yeedu.com/blog/run-spark-job-from-command-line';
-const OLD_ID = '6baf632a-ce11-4358-a255-c2d6a91df53f';   // set to the previous deck's id to replace it
+const OLD_ID = '65694a85-4ff9-49e0-9fcf-7552b0082298';   // set to the previous deck's id to replace it
 
 const O = C.orange, OL = C.orangeLight;
 
@@ -147,7 +147,7 @@ function drawCommandAnatomy() {
   b += annot(14, 120, {
     label: 'THE WHOLE WORKFLOW',
     value: 'one line',
-    note: 'pip install yeedu-cli==4.10.4 — Windows, Linux, macOS',
+    note: 'pip install yeedu-cli==4.10.4 · Windows, Linux, macOS',
   });
   return svg(200, 162, b);
 }
@@ -229,8 +229,8 @@ const slides = [
     html: stage(
       logoMark(34) +
       eyebrow('Yeedu CLI') +
-      headline(`Run Spark ${em('Without The Browser.')}`, 58) +
-      caption('The Yeedu CLI drives clusters, jobs and notebooks from the terminal — over the same APIs the console calls.') +
+      headline(`Run Spark ${em('without the browser')}`, 58) +
+      caption('The Yeedu CLI drives clusters, jobs and notebooks from the terminal, over the same APIs the console calls.') +
       well(drawTwoRoutes()),
       'A'
     ),
@@ -239,7 +239,7 @@ const slides = [
     notes: 'The UI tax — navigation and page loads dominate every action',
     html: stage(
       eyebrow('Where the time goes') +
-      headline(`The Console Tax ${em('Is Mostly Waiting.')}`, 54) +
+      headline(`You're mostly ${em('waiting on reloads')}`, 46) +
       caption('Navigation, page loads and manual refreshes surround every action. The thing you meant to do is the thin slice.') +
       well(drawUiTax()),
       'C'
@@ -249,8 +249,8 @@ const slides = [
     notes: 'Anatomy — one line starts the job',
     html: stage(
       eyebrow('Anatomy') +
-      headline(`One Line ${em('Starts The Job.')}`, 56) +
-      caption('Install once with pip, then drive Yeedu from any shell — the flags name the job, the workspace, and how you want to wait.') +
+      headline(`One line ${em('starts the job')}`, 56) +
+      caption('Install once with pip, then drive Yeedu from any shell. The flags name the job, the workspace, and how long you want to wait.') +
       well(drawCommandAnatomy()),
       'B'
     ),
@@ -259,7 +259,7 @@ const slides = [
     notes: '--follow — resolves to one of four terminal states',
     html: stage(
       eyebrow('--follow') +
-      headline(`It Blocks ${em('Until It Is Done.')}`, 56) +
+      headline(`--follow blocks ${em("until it's done")}`, 56) +
       caption('Instead of refreshing a page, the command keeps fetching status until the run reaches a terminal state.') +
       well(drawFollowStates()),
       'D'
@@ -270,8 +270,8 @@ const slides = [
     html: stage(
       logoMark(34) +
       eyebrow('Get started') +
-      headline(`Same Platform. ${em('No Side Door.')}`, 54) +
-      caption('The CLI runs on the same APIs, security model and permissions as the UI.') +
+      headline(`We only built ${em('one control plane')}`, 54) +
+      caption('The CLI runs on the same APIs, security model and permissions as the UI. Nothing here is a second implementation.') +
       well(drawOnePlane()) +
       `<div style="display:flex;align-items:center;justify-content:space-between;gap:36px;margin-top:34px;">
          <div>

@@ -18,7 +18,7 @@ import {
 } from './yeedu-chrome.mjs';
 
 const BLOG_URL = 'https://yeedu.com/blog/top-aws-emr-alternatives-in-2026-cost-effective-big-data-tools-for-modern-data-platforms';
-const OLD_ID = '63ffa047-1c61-4543-9cbe-e9c44566f1d8';   // set to the previous deck's id to replace it
+const OLD_ID = '4901b0b3-6925-49a2-ad6f-a13059616389';   // set to the previous deck's id to replace it
 
 const O = C.orange, OL = C.orangeLight;
 
@@ -59,7 +59,7 @@ function drawOpsLoop() {
   // the same job, no loop around it
   b += `<text x="11" y="84" font-family="Inter" font-size="5.6" font-weight="600" letter-spacing="0.9" fill="${OL}">THE EXECUTION MODEL</text>`;
   b += `<rect x="11" y="92" width="177" height="20" rx="5" fill="${O}" fill-opacity="0.16" stroke="${O}" stroke-width="1.2"/>`;
-  b += `<text x="99.5" y="105" text-anchor="middle" font-family="Inter" font-size="7" font-weight="600" letter-spacing="0.9" fill="${OL}">RUN THE SAME CODE — FASTER</text>`;
+  b += `<text x="99.5" y="105" text-anchor="middle" font-family="Inter" font-size="7" font-weight="600" letter-spacing="0.9" fill="${OL}">RUN THE SAME CODE · FASTER</text>`;
 
   b += annot(14, 126, {
     label: 'TWO OPERATING MODELS, ONE BILL',
@@ -220,8 +220,8 @@ const slides = [
       logoMark(34) +
       eyebrow('EMR alternatives') +
       // ~34 characters is the one-line budget at this size; longer wraps mid-italic.
-      headline(`EMR's Real Cost ${em('Is Operational.')}`, 54) +
-      caption('The 2026 question is no longer which cluster is cheaper. It is which operating model you still want to be running in five years.') +
+      headline(`EMR's real cost ${em('is your on-call')}`, 54) +
+      caption('Cluster price is easy to compare, so everyone compares it. The number that decides this is how many people you need on call in year three.') +
       well(drawOpsLoop()),
       'A'
     ),
@@ -230,7 +230,7 @@ const slides = [
     notes: 'The overhead — EMR hands four standing duties to your team',
     html: stage(
       eyebrow('The overhead') +
-      headline(`Flexibility ${em('Becomes Operations.')}`, 54) +
+      headline(`You tune it, ${em('or nobody does')}`, 54) +
       caption('Cluster sizing, infrastructure tuning, continuous monitoring and cost explanation all land on your team rather than on the platform.') +
       well(drawOwnership()),
       'B'
@@ -240,7 +240,7 @@ const slides = [
     notes: 'The landscape — every alternative optimizes a different layer',
     html: stage(
       eyebrow('The landscape') +
-      headline(`Every Platform ${em('Optimizes Something.')}`, 50) +
+      headline(`Everyone optimizes ${em('a different layer')}`, 50) +
       caption('Most EMR alternatives move the work to a different layer of the stack. Only one of them optimizes the layer where the job actually runs.') +
       well(drawLayers()),
       'D'
@@ -250,8 +250,8 @@ const slides = [
     notes: 'Zero rewrites — the migration is a runtime swap',
     html: stage(
       eyebrow('Zero rewrites') +
-      headline(`Same Code. ${em('Different Engine.')}`, 54) +
-      caption('Yeedu changes how Spark executes, not what you wrote. Existing PySpark, Scala and Java run in their original form.') +
+      headline(`Same code, ${em('different engine')}`, 54) +
+      caption('We changed how Spark executes, not what you wrote. Existing PySpark, Scala and Java run unmodified.') +
       well(drawSameCode()),
       'C'
     ),
@@ -261,8 +261,8 @@ const slides = [
     html: stage(
       logoMark(34) +
       eyebrow('How to choose') +
-      headline(`Pick The Trade-Off, ${em('Not The Logo.')}`, 50) +
-      caption('Four questions decide this more reliably than any feature matrix.') +
+      headline(`Pick the trade-off, ${em('not the logo')}`, 50) +
+      caption("Four questions decide this more reliably than any feature matrix. If you can't answer them, the matrix won't help.") +
       well(drawCriteria()) +
       `<div style="display:flex;align-items:center;justify-content:space-between;gap:36px;margin-top:34px;">
          <div>

@@ -14,6 +14,7 @@ AI-powered Instagram carousel builder. Next.js 16 + React 19 + TypeScript + Tail
 ## Key Files
 
 - `src/lib/chat-system-prompt.ts` — Dynamic system prompt (injects brand config + carousel context)
+- `.claude/skills/measured-humanizer/` — Copy vetoes + `gate/carousel_gate.mjs`, the anti-AI-tell linter for slide copy
 - `src/lib/slide-html.ts` — `wrapSlideHtml()` wraps slide body HTML into full documents
 - `src/lib/data.ts` — JSON storage with proper async-mutex and atomic writes
 - `src/lib/carousels.ts` — Carousel and slide CRUD with version history
@@ -54,6 +55,12 @@ All at localhost:3000:
 - The Claude subprocess gets `--allowedTools Bash WebFetch` and uses curl to call local API routes
 - Video timing is always integer frames at `FPS` (`src/types/video.ts`) — never float milliseconds, which drifts in `xfade` offsets and leaves a black tail frame
 - Any `clip` arriving from a request goes through `normalizeClip()` before it is stored or rendered; `updateSlide()` assigns whitelisted fields one by one, so never reintroduce a blanket `Object.assign` there
+- Slide copy is gated: `node .claude/skills/measured-humanizer/gate/carousel_gate.mjs --carousel <id> --brief` must report `PASS` before a deck is done. `--all` audits every deck and prints the house fingerprint. Exit code is always 0; read `PASS`/`FAIL` from stdout
+- Copy vetoes (both generation paths enforce these): no "not X, but Y", no two-beat antithesis ("Storage is cheap. Compaction is not."), no negation-reframe, no discourse markers ("the real problem is"), no "is that" filler, no em dashes in prose, sentence-case headlines with no terminal full stop, no engagement-bait CTAs. Rationale and corpus numbers in `.claude/skills/measured-humanizer/SKILL.md`
+- Do **not** add a banned-word list for "AI words" — hedging, bridge phrases and promotional adjectives measured at chance (AUC 0.52-0.54) and are deliberately not gated
+- Deck copy lives in `scripts/<deck>.mjs`, which is the source of truth. Fix copy there and re-run the script; edits to `data/carousels.json` get overwritten
+- Two decks (Iceberg Compaction, Database Branching) were authored through the chat panel and have no generator. Their copy edits live in `scripts/yeedu-humanize-chat-decks.mjs`, which patches slide HTML through the API and is idempotent
+- `scripts/yeedu-reexport.mjs [id ...]` re-exports decks to `output/<slug>/` without rebuilding them; Puppeteer drops a page as "Target closed" often enough that it retries three times
 
 ## Instagram Dimensions
 
