@@ -388,9 +388,9 @@ const vb = qrSvg.match(/viewBox="([^"]+)"/)[1];      // module count varies with
 - **Exports are slow — budget minutes, not seconds.** Each slide renders at 1080×1350 ×
   `deviceScaleFactor 4` = 4320×5400. A five-slide deck runs several minutes; run it in the
   background rather than under a short timeout.
-- **The endpoint serializes exports itself** (a process-wide mutex in `src/lib/export-slides.ts`),
-  so overlapping requests queue instead of crashing the shared browser with
-  `Protocol error (Page.captureScreenshot): Target closed`. Two more settings make long captures
+- **The renderer serializes itself** (a process-wide mutex around every capture in
+  `src/lib/export-slides.ts`, with one shared browser launched once), so overlapping requests queue
+  slide by slide instead of timing out in `Page.captureScreenshot`. Two more settings make long captures
   survivable and must stay: `protocolTimeout: 600_000` on `puppeteer.launch()` (the 180s default
   kills a 4320×5400 `Page.captureScreenshot` outright) and `maxDuration = 600` on the route.
 - **Call the endpoint over `node:http`, not `fetch`.** Node's `fetch` has a 300s headers timeout

@@ -205,8 +205,8 @@ function postForBuffer(url) {
  * the JPEG conversion happen here. The output directory is wiped first, so a
  * deck rebuilt with fewer slides never leaves a stale trailing image behind.
  *
- * Exports are not serialized server-side — run one at a time, or the shared
- * browser dies with `Protocol error (Page.captureScreenshot): Target closed`.
+ * The server renders one slide at a time across all requests, so overlapping
+ * exports queue behind each other rather than failing.
  */
 export async function exportDeck(id, name) {
   const zip = await postForBuffer(`${BASE}/api/carousels/${id}/export`);

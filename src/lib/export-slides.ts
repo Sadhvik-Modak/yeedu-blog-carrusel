@@ -1,4 +1,5 @@
 import puppeteer, { type Browser } from "puppeteer";
+import { Mutex } from "async-mutex";
 import { readFile } from "fs/promises";
 import path from "path";
 import sharp from "sharp";
@@ -7,25 +8,47 @@ import { getInlinedFontCSS } from "./fonts";
 import type { Slide, AspectRatio } from "@/types/carousel";
 import { DIMENSIONS } from "@/types/carousel";
 
-// Singleton browser with lifecycle management
-let browser: Browser | null = null;
-let exportCount = 0;
-const MAX_EXPORTS_BEFORE_RESTART = 50;
+const MAX_RENDERS_BEFORE_RESTART = 50;
 
+// A 4320x5400 capture can outlast puppeteer's 180s default on a busy machine.
+const PROTOCOL_TIMEOUT_MS = 600_000;
+
+interface RenderState {
+  browser: Promise<Browser> | null;
+  renders: number;
+  mutex: Mutex;
+}
+
+// One shared browser, one render at a time, process-wide. Overlapping exports
+// used to capture in the same browser at once and time out in
+// Page.captureScreenshot, and callers racing an unset singleton each launched
+// (and leaked) their own browser. The state lives on globalThis so a dev-server
+// module reload reuses the browser instead of orphaning it.
+const globalForRender = globalThis as typeof globalThis & {
+  __carouselRender?: RenderState;
+};
+const state = (globalForRender.__carouselRender ??= {
+  browser: null,
+  renders: 0,
+  mutex: new Mutex(),
+});
+
+/** Only call while holding `state.mutex`, so no page is open during a restart. */
 async function getBrowser(): Promise<Browser> {
-  if (browser && exportCount >= MAX_EXPORTS_BEFORE_RESTART) {
-    await browser.close().catch(() => {});
-    browser = null;
-    exportCount = 0;
+  if (state.browser) {
+    const current = await state.browser.catch(() => null);
+    if (current?.isConnected() && state.renders < MAX_RENDERS_BEFORE_RESTART) {
+      return current;
+    }
+    await current?.close().catch(() => {});
   }
-  if (!browser || !browser.isConnected()) {
-    browser = await puppeteer.launch({
-      headless: true,
-      args: ["--no-sandbox", "--disable-setuid-sandbox", "--disable-gpu"],
-    });
-    exportCount = 0;
-  }
-  return browser;
+  state.renders = 0;
+  state.browser = puppeteer.launch({
+    headless: true,
+    protocolTimeout: PROTOCOL_TIMEOUT_MS,
+    args: ["--no-sandbox", "--disable-setuid-sandbox", "--disable-gpu"],
+  });
+  return state.browser;
 }
 
 /**
@@ -94,46 +117,53 @@ export async function renderHtmlToPng(
     inlineFontCss: inlinedFontCss,
   });
 
-  const br = await getBrowser();
-  const page = await br.newPage();
+  const screenshotBuffer = await state.mutex.runExclusive(async () => {
+    const br = await getBrowser();
+    const page = await br.newPage();
 
-  try {
-    await page.setViewport({ width, height, deviceScaleFactor: scale });
-    await page.setContent(fullHtml, { waitUntil: "domcontentloaded", timeout: 15000 });
+    try {
+      await page.setViewport({ width, height, deviceScaleFactor: scale });
+      await page.setContent(fullHtml, { waitUntil: "domcontentloaded", timeout: 15000 });
 
-    // Wait for fonts to be ready
-    await page
-      .waitForFunction(
-        () =>
-          document.fonts.ready.then(() =>
-            [...document.fonts].every((f) => f.status === "loaded")
-          ),
-        { timeout: 10000 }
-      )
-      .catch(() => {
-        // Font loading timeout — proceed with whatever loaded
+      // Force layout so the faces the slide uses start loading, then wait for
+      // them. Declared faces the slide never uses stay "unloaded", so waiting
+      // for every face to be "loaded" always ran out the full timeout.
+      await page
+        .waitForFunction(
+          () => {
+            document.body.getBoundingClientRect();
+            return document.fonts.ready.then(() =>
+              [...document.fonts].every((f) => f.status !== "loading")
+            );
+          },
+          { timeout: 10000 }
+        )
+        .catch(() => {
+          // Font loading timeout — proceed with whatever loaded
+        });
+
+      const shot = await page.screenshot({
+        type: "png",
+        omitBackground,
+        clip: { x: 0, y: 0, width, height },
       });
 
-    const screenshotBuffer = await page.screenshot({
-      type: "png",
-      omitBackground,
-      clip: { x: 0, y: 0, width, height },
-    });
+      state.renders++;
+      return shot;
+    } finally {
+      await page.close().catch(() => {});
+    }
+  });
 
-    exportCount++;
+  if (!postProcess) return Buffer.from(screenshotBuffer);
 
-    if (!postProcess) return Buffer.from(screenshotBuffer);
+  // Post-process with Sharp: enforce sRGB
+  const processed = await sharp(screenshotBuffer)
+    .toColorspace("srgb")
+    .png()
+    .toBuffer();
 
-    // Post-process with Sharp: enforce sRGB
-    const processed = await sharp(screenshotBuffer)
-      .toColorspace("srgb")
-      .png()
-      .toBuffer();
-
-    return processed;
-  } finally {
-    await page.close().catch(() => {});
-  }
+  return processed;
 }
 
 /**
@@ -148,8 +178,8 @@ export async function exportSlide(
 }
 
 /**
- * Export all slides of a carousel to PNG buffers.
- * Processes up to 3 slides concurrently.
+ * Export all slides of a carousel to PNG buffers, in slide order.
+ * Renders are serialized process-wide, so slides go one after another.
  */
 export async function exportAllSlides(
   slides: Slide[],
@@ -158,19 +188,11 @@ export async function exportAllSlides(
   options?: RenderOptions
 ): Promise<{ name: string; buffer: Buffer }[]> {
   const results: { name: string; buffer: Buffer }[] = [];
-  const CONCURRENCY = 3;
 
-  for (let i = 0; i < slides.length; i += CONCURRENCY) {
-    const batch = slides.slice(i, i + CONCURRENCY);
-    const batchResults = await Promise.all(
-      batch.map(async (slide, batchIdx) => {
-        const idx = i + batchIdx;
-        const buffer = await exportSlide(slide, aspectRatio, options);
-        onProgress?.(idx + 1, slides.length);
-        return { name: `slide-${idx + 1}.png`, buffer };
-      })
-    );
-    results.push(...batchResults);
+  for (let i = 0; i < slides.length; i++) {
+    const buffer = await exportSlide(slides[i], aspectRatio, options);
+    onProgress?.(i + 1, slides.length);
+    results.push({ name: `slide-${i + 1}.png`, buffer });
   }
 
   return results;
