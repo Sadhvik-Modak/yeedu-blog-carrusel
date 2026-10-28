@@ -188,7 +188,7 @@ Full CSS in `references/stage.md`.
 | C | cost / value |
 | D | wide architecture diagrams |
 
-**Footer band on every slide**: 80px from edges, logo 28–34px left, `yeedu.io` right at
+**Footer band on every slide**: 80px from edges, logo 28–34px left, `yeedu.com` right at
 `rgba(255,255,255,0.42)`.
 
 ### Eyebrow chip
@@ -244,8 +244,8 @@ asks for all three — a single 4:5 deck is the common request.
 2. **Never use light/white backgrounds.** The stage is always warm dark. (A small white card
    behind a QR code is the one exception.)
 3. **Never invent Yeedu stats.** Topic stats come from the source material.
-4. **Never skip the footer band** (logo + `yeedu.io`).
-5. **Every closer includes**: orange pill CTA, `sales@yeedu.io`, and a QR when a URL is given.
+4. **Never skip the footer band** (logo + `yeedu.com`).
+5. **Every closer includes**: orange pill CTA, `sales@yeedu.com`, and a QR when a URL is given.
 6. **Never reuse a drawing** across slides or across decks. Chrome is shared; drawings are not.
 7. **Never let an icon stand in for a diagram.** See Part 1.
 8. **For print banners**, confirm the export ran at `deviceScaleFactor: 4`.

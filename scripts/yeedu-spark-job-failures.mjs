@@ -180,7 +180,7 @@ const cta = BLOG_URL
   ? `<div style="display:flex;align-items:center;justify-content:space-between;gap:32px;margin-top:22px;">
        <div>
          ${ctaPill(CTA)}
-         <div style="margin-top:16px;font-size:21px;color:${C.text2};font-weight:500;">sales@yeedu.io</div>
+         <div style="margin-top:16px;font-size:21px;color:${C.text2};font-weight:500;">sales@yeedu.com</div>
        </div>
        <div style="text-align:center;">
          ${qr}
@@ -189,7 +189,7 @@ const cta = BLOG_URL
      </div>`
   : `<div style="display:flex;align-items:center;justify-content:space-between;gap:28px;margin-top:30px;padding-top:28px;border-top:1px solid ${C.rule};">
        ${ctaPill(CTA)}
-       <div style="font-size:22px;color:${C.text2};font-weight:500;">sales@yeedu.io</div>
+       <div style="font-size:22px;color:${C.text2};font-weight:500;">sales@yeedu.com</div>
      </div>`;
 
 const slides = [
@@ -231,7 +231,7 @@ const slides = [
     `, 'D'),
   },
   {
-    notes: 'Closer — claim: Yeedu Assistant (Assistant X) joins logs, History Server events and cluster monitoring into one root-cause analysis. Convergence bookend inverting the cover tree; CTA pill + sales@yeedu.io (QR when BLOG_URL is set)',
+    notes: 'Closer — claim: Yeedu Assistant (Assistant X) joins logs, History Server events and cluster monitoring into one root-cause analysis. Convergence bookend inverting the cover tree; CTA pill + sales@yeedu.com (QR when BLOG_URL is set)',
     html: stage(`
       ${logoMark(32)}
       ${eyebrow('Yeedu Assistant (Assistant X)')}

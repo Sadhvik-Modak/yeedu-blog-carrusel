@@ -173,7 +173,7 @@ const cta = BLOG_URL
   ? `<div style="display:flex;align-items:center;justify-content:space-between;gap:32px;margin-top:22px;">
        <div>
          ${ctaPill(CTA)}
-         <div style="margin-top:16px;font-size:21px;color:${C.text2};font-weight:500;">sales@yeedu.io</div>
+         <div style="margin-top:16px;font-size:21px;color:${C.text2};font-weight:500;">sales@yeedu.com</div>
        </div>
        <div style="text-align:center;">
          ${qr}
@@ -182,7 +182,7 @@ const cta = BLOG_URL
      </div>`
   : `<div style="display:flex;align-items:center;justify-content:space-between;gap:28px;margin-top:30px;padding-top:28px;border-top:1px solid ${C.rule};">
        ${ctaPill(CTA)}
-       <div style="font-size:22px;color:${C.text2};font-weight:500;">sales@yeedu.io</div>
+       <div style="font-size:22px;color:${C.text2};font-weight:500;">sales@yeedu.com</div>
      </div>`;
 
 const slides = [
@@ -224,7 +224,7 @@ const slides = [
     `, 'D'),
   },
   {
-    notes: 'Closer — claim: Yeedu mode (with Turbo) runs the entire Spark job on a single VM, so nothing is partitioned across machines and no shuffle crosses the network (facts pack, no figure attached). Bookend: the cover lattice returns as a dim driver + 4 workers with 12 network paths vs one orange VM with 0; CTA pill + sales@yeedu.io (QR when BLOG_URL is set)',
+    notes: 'Closer — claim: Yeedu mode (with Turbo) runs the entire Spark job on a single VM, so nothing is partitioned across machines and no shuffle crosses the network (facts pack, no figure attached). Bookend: the cover lattice returns as a dim driver + 4 workers with 12 network paths vs one orange VM with 0; CTA pill + sales@yeedu.com (QR when BLOG_URL is set)',
     html: stage(`
       ${logoMark(32)}
       ${eyebrow('Yeedu mode')}

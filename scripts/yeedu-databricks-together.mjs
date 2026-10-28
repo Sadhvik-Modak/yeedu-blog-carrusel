@@ -14,7 +14,7 @@ import {
   makeQr, ctaPill, buildCarousel, deleteCarousel, exportDeck,
 } from './yeedu-chrome.mjs';
 
-const BLOG_URL = 'https://yeedu.com/blog/databricks-and-yeedu-how-they-work-together';
+const BLOG_URL = 'https://yeedu.com/blog/databricks-yeedu-how-they-work-together';
 const OLD_ID = process.env.OLD_ID || '';   // set to the previous deck's id to replace it
 
 const O = C.orange, OL = C.orangeLight;
@@ -249,7 +249,7 @@ const slides = [
       `<div style="display:flex;align-items:center;justify-content:space-between;gap:36px;margin-top:34px;">
          <div>
            ${ctaPill('Get the query and a pilot plan')}
-           <div style="margin-top:18px;font-size:21px;font-weight:600;color:${C.text2};">sales@yeedu.io</div>
+           <div style="margin-top:18px;font-size:21px;font-weight:600;color:${C.text2};">sales@yeedu.com</div>
          </div>
          <div style="text-align:center;">
            ${qr}

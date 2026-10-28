@@ -80,7 +80,7 @@ export function stage(inner, variant = 'A') {
   <div style="position:absolute;inset:0;z-index:2;display:flex;flex-direction:column;padding:${R.padTop}px ${R.padX}px ${R.padBottom}px;box-sizing:border-box;">${inner}</div>
   <div style="position:absolute;left:${R.padX}px;right:${R.padX}px;bottom:48px;display:flex;align-items:center;justify-content:space-between;font-size:16px;color:${C.text3};z-index:5;">
     <img src="${LOGO}" style="height:26px;opacity:0.9;" />
-    <span style="font-weight:500;letter-spacing:0.5px;">yeedu.io</span>
+    <span style="font-weight:500;letter-spacing:0.5px;">yeedu.com</span>
   </div>
 </div>`;
 }
